@@ -109,8 +109,10 @@ namespace WechatConnector.Controllers
                         {
                             ChannelId = DIRECTLINE_CHANNEL,
                             ConversationId = conversation.ConversationId,
-                            UserId = incomingMessage.FromUserName
+                            UserId = incomingMessage.FromUserName,
+                            Subchannel = WECHAT_SUBCHANNEL
                         };
+                        await _deviceRegistrar.RegisterDeviceAsync(deviceRegistration);
 
                         await _directLineConnector.JoinConversationAsync(conversation.ConversationId, incomingMessage.FromUserName, WECHAT_SUBCHANNEL);
                     }
@@ -126,9 +128,8 @@ namespace WechatConnector.Controllers
 
                     if (incomingMessage.MessageType == WechatMessageTypes.TEXT || incomingMessage.isClickEvent())
                     {
-                        string s = incomingMessage.MessageType == WechatMessageTypes.TEXT ? incomingMessage.Content : incomingMessage.EventKey;
-                        await _directLineConnector.PostAsync(deviceRegistration.ConversationId, s, userId: incomingMessage.FromUserName, subchannel: WECHAT_SUBCHANNEL);
-
+                        string message = incomingMessage.MessageType == WechatMessageTypes.TEXT ? incomingMessage.Content : incomingMessage.EventKey;
+                        await _directLineConnector.PostAsync(deviceRegistration.ConversationId, message, userId: incomingMessage.FromUserName, subchannel: WECHAT_SUBCHANNEL);
                     }
                 }
                 catch (Exception ex)
