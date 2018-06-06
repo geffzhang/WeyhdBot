@@ -14,11 +14,34 @@ namespace WechatConnector
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+#if DEBUG
+            PrintSplash();
+#endif
+            CreateWebHostBuild(args)
+                .Build()
+                .Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        public static IWebHostBuilder CreateWebHostBuild(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
+
+        private static void PrintSplash()
+        {
+            try
+            {
+                Console.BackgroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("".PadRight(Console.WindowWidth - 1));
+                Console.WriteLine(" WeChat Connector".PadRight(Console.WindowWidth - 1));
+                Console.WriteLine("".PadRight(Console.WindowWidth - 1));
+                Console.WriteLine();
+                Console.ResetColor();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
     }
 }

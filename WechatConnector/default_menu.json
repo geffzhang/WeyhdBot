@@ -1,0 +1,29 @@
+﻿{
+  "button": [
+    {
+      "name": "精华文章",
+      "sub_button": [
+        {
+          "type": "click",
+          "name": "大数据",
+          "key": "bigdata"
+        },
+        {
+          "type": "click",
+          "name": "往期精彩",
+          "key": "Excellent time to go"
+        },
+        {
+          "type": "click",
+          "name": "TypeScript",
+          "key": "typescript"
+        }
+      ]
+    },
+    {
+      "type": "click",
+      "name": "发现",
+      "key": "find"
+    }
+  ]
+}

@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeyhdBot", "WeyhdBot\WeyhdB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WechatConnector", "WechatConnector\WechatConnector.csproj", "{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeyhdBot.WechatClient", "WeyhdBot.WechatClient\WeyhdBot.WechatClient.csproj", "{9319F7F3-8A64-4B70-BEF8-01BB0765C6AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeyhdBot.Core", "WeyhdBot.Core\WeyhdBot.Core.csproj", "{F793BF86-33D6-4E2E-AFF1-47FEE475A6B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeyhdBot.DocumentDB", "WeyhdBot.DocumentDB\WeyhdBot.DocumentDB.csproj", "{7F1DBA0F-F4B5-4D2B-9B71-793F7176C8B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,9 +29,26 @@ Global
 		{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9319F7F3-8A64-4B70-BEF8-01BB0765C6AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9319F7F3-8A64-4B70-BEF8-01BB0765C6AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9319F7F3-8A64-4B70-BEF8-01BB0765C6AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9319F7F3-8A64-4B70-BEF8-01BB0765C6AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F793BF86-33D6-4E2E-AFF1-47FEE475A6B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F793BF86-33D6-4E2E-AFF1-47FEE475A6B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F793BF86-33D6-4E2E-AFF1-47FEE475A6B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F793BF86-33D6-4E2E-AFF1-47FEE475A6B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F1DBA0F-F4B5-4D2B-9B71-793F7176C8B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F1DBA0F-F4B5-4D2B-9B71-793F7176C8B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F1DBA0F-F4B5-4D2B-9B71-793F7176C8B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F1DBA0F-F4B5-4D2B-9B71-793F7176C8B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9319F7F3-8A64-4B70-BEF8-01BB0765C6AF} = {7C89F66B-D3F8-401C-A6A4-7870357166F0}
+		{F793BF86-33D6-4E2E-AFF1-47FEE475A6B5} = {7C89F66B-D3F8-401C-A6A4-7870357166F0}
+		{7F1DBA0F-F4B5-4D2B-9B71-793F7176C8B8} = {7C89F66B-D3F8-401C-A6A4-7870357166F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B46EDE47-8136-446F-B9C2-D3E39BF84DCB}
