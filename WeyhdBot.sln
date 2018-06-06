@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{7C89F66B-D3F8-401C-A6A4-7870357166F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeyhdBot", "WeyhdBot\WeyhdBot.csproj", "{0F7DAA5F-2884-48EF-9A71-F44505FFE900}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WechatConnector", "WechatConnector\WechatConnector.csproj", "{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0F7DAA5F-2884-48EF-9A71-F44505FFE900}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F7DAA5F-2884-48EF-9A71-F44505FFE900}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F7DAA5F-2884-48EF-9A71-F44505FFE900}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F7DAA5F-2884-48EF-9A71-F44505FFE900}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ECBEA50-859B-42B0-A7FF-BF90F5E51BF6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B46EDE47-8136-446F-B9C2-D3E39BF84DCB}
+	EndGlobalSection
+EndGlobal
