@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Bot.Builder.Ai.LUIS;
 using Microsoft.Bot.Builder.BotFramework;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WeyhdBot.Dispatch;
+using System.IO.Compression;
 
 namespace WeyhdBot
 {
@@ -40,6 +42,8 @@ namespace WeyhdBot
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+
             services.AddSingleton(this.Configuration);
             services.AddScoped<IMessageDispatcher>( x => new MessageDispatcher(Configuration.GetSection("WechatOutgoingURI").Value));
             services.AddBot<LuisDispatchBot>(options =>
@@ -65,7 +69,6 @@ namespace WeyhdBot
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseDefaultFiles()
                 .UseStaticFiles()
                 .UseBotFramework();

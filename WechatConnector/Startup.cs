@@ -20,6 +20,8 @@ using WeyhdBot.DocumentDB.Options;
 using WeyhdBot.WechatClient.Cryptography;
 using WeyhdBot.WechatClient.Connector;
 using WeyhdBot.WechatClient;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 
 namespace WechatConnector
 {
@@ -39,6 +41,18 @@ namespace WechatConnector
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddResponseCompression(options =>
+            {
+                //options.Providers.Add<GzipCompressionProvider>();
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
+            });
+
+            //services.Configure<GzipCompressionProviderOptions>(options =>
+            //{
+            //    options.Level = CompressionLevel.Fastest;
+            //});
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                  .AddXmlSerializerFormatters();
 
@@ -73,7 +87,7 @@ namespace WechatConnector
                 string logFilesRoot = Path.Combine(homeDir, "LogFiles", "NLog");
                 NLog.LogManager.Configuration.Variables["logroot"] = logFilesRoot;
             }
-
+            app.UseResponseCompression();
             app.UseMvc();
             app.UseDefaultFiles();
             app.UseStaticFiles();
