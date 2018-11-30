@@ -13,9 +13,9 @@
     {
       "type": "luis",
       "name": "myluis",
-      "appId": "1e8f8b11-26a4-4255-965a-a07244851ecb",
-      "authoringKey": "d79949aaa93a44e99ce06d44bb3bc87b",
-      "subscriptionKey": "d79949aaa93a44e99ce06d44bb3bc87b",
+      "appId": "",
+      "authoringKey": "",
+      "subscriptionKey": "",
       "version": "0.1",
       "region": "eastasia",
       "id": "7"
@@ -24,10 +24,10 @@
       "type": "qna",
       "name": "sample-qna",
       "id": "201",
-      "kbId": "a6a4670e-4fc3-4094-8a81-4612cffd0c81",
-      "subscriptionKey": "1691d0fea971443790e8682e6731098d",
-      "endpointKey": "57726d22-b28d-4955-b52e-000821488657",
-      "hostname": "https://yhdqna.azurewebsites.net/qnamaker"
+      "kbId": "",
+      "subscriptionKey": "",
+      "endpointKey": "",
+      "hostname": ""
     },
     {
       "type": "dispatch",
@@ -36,18 +36,18 @@
         "7"
       ],
       "name": "nlp-with-dispatchDispatch",
-      "appId": "1e8f8b11-26a4-4255-965a-a07244851ecb",
-      "authoringKey": "d79949aaa93a44e99ce06d44bb3bc87b",
-      "subscriptionKey": "d79949aaa93a44e99ce06d44bb3bc87b",
+      "appId": "",
+      "authoringKey": "",
+      "subscriptionKey": "",
       "version": "Dispatch",
       "region": "eastasia",
       "id": "161"
     },
     {
       "type": "endpoint",
-      "appId": "06004d6a-881d-4784-872d-c2fcf605a12e",
-      "appPassword": "xvzjaDH0001^?ziPBSBE8=?",
-      "endpoint": "https://bot.weyhd.com/api/messages",
+      "appId": "",
+      "appPassword": ""
+      "endpoint": "",
       "name": "production",
       "id": "165"
     }
