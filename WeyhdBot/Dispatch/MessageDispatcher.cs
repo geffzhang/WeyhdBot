@@ -1,12 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
-using Microsoft.Bot.Connector;
 using Microsoft.Bot.Schema;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using WeyhdBot.Core.Wechat;
 using WeyhdBot.Extensions;
 
@@ -21,33 +22,34 @@ namespace WeyhdBot.Dispatch
             _wechatOutgoingURI = wechatOutgoingUri;
         }
 
-        public async Task DispatchAsync(ITurnContext context, IMessageActivity activity)
+        public async Task DispatchAsync(ITurnContext context, IMessageActivity activity, CancellationToken cancellationToken = default)
         {
             if (context.IsWechat())
             {
-                await DispatchToWechatAsync(context, activity);
+                await DispatchToWechatAsync(context, activity, cancellationToken);
             }
-            await context.SendActivity(activity);
+
+            await context.SendActivityAsync(activity, cancellationToken);
         }
 
-        private async Task DispatchToWechatAsync(ITurnContext context, IMessageActivity activity)
+        private async Task DispatchToWechatAsync(ITurnContext context, IMessageActivity activity, CancellationToken cancellationToken = default)
         {
-            //The connector could handle this conversion instead...
+            // The connector could handle this conversion instead...
             var wechatMessage = ConvertMessage(context, activity);
 
             using (var client = new HttpClient())
             {
                 var content = new StringContent(JsonConvert.SerializeObject(wechatMessage), Encoding.UTF8);
-                await client.PostAsync(_wechatOutgoingURI, content);
+                await client.PostAsync(_wechatOutgoingURI, content, cancellationToken);
             }
         }
 
         private WechatMessage ConvertMessage(ITurnContext context, IMessageActivity activity)
         {
-            //The connector could handle this conversion instead...
+            // The connector could handle this conversion instead...
             var wechatMessage = new WechatMessage
             {
-                ToUserName = context.GetChannelUserId()
+                ToUserName = context.GetChannelUserId(),
             };
 
             var richCards = activity.Attachments?.Where(att => att.ContentType.Equals("application/vnd.microsoft.card.hero", System.StringComparison.InvariantCultureIgnoreCase));
@@ -61,7 +63,7 @@ namespace WeyhdBot.Dispatch
                     {
                         Title = richCard.Title,
                         Description = richCard.Subtitle ?? richCard.Text,
-                        PicUrl = richCard.Images?.FirstOrDefault()?.Url ?? string.Empty
+                        PicUrl = richCard.Images?.FirstOrDefault()?.Url ?? string.Empty,
                     };
                 });
 

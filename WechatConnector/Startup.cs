@@ -1,27 +1,30 @@
-﻿using Microsoft.ApplicationInsights.DependencyCollector;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
-using NLog.Web;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NLog.Extensions.Logging;
+using NLog.Web;
+using Senparc.CO2NET;
+using Senparc.Weixin.Entities;
 using WeyhdBot.Core.Devices;
 using WeyhdBot.Core.Devices.Options;
-using WeyhdBot.DocumentDB;
-using WeyhdBot.DocumentDB.Devices;
-using WeyhdBot.DocumentDB.Options;
-using WeyhdBot.WechatClient.Cryptography;
-using WeyhdBot.WechatClient.Connector;
-using WeyhdBot.WechatClient;
-using Microsoft.AspNetCore.ResponseCompression;
-using System.IO.Compression;
+using WeyhdBot.MongoDb;
+using WeyhdBot.MongoDb.Devices;
+using WeyhdBot.MongoDb.Extensions;
+using WeyhdBot.Wechat.Client;
+using WeyhdBot.Wechat.Connector;
+using WeyhdBot.Wechat.Extensions;
+using WeyhdBot.Wechat.Options;
 
 namespace WechatConnector
 {
@@ -34,9 +37,7 @@ namespace WechatConnector
         }
 
         public IHostingEnvironment HostingEnvironment { get; }
-
         public IConfiguration Configuration { get; }
-
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -48,27 +49,33 @@ namespace WechatConnector
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
             });
 
-            //services.Configure<GzipCompressionProviderOptions>(options =>
-            //{
-            //    options.Level = CompressionLevel.Fastest;
-            //});
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                 .AddXmlSerializerFormatters();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddMemoryCache();//使用本地缓存必须添加
+            services.AddSession();//使用Session
 
             ConfigureOptions(services);
 
-            services.AddSingleton<ISHA1Encryptor, SHA1Encryptor>();
-            services.AddSingleton<IDocumentDBConnector, DocumentDBConnector>();
+            services.AddSharRepositoryFactory(Configuration);
+            services.AddSenparcServers(Configuration);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+
+            services.AddSingleton<IMongoDBConnector, MongoDBConnector>();
             services.AddScoped<IWechatClient, WechatClient>();
             services.AddScoped<IDirectLineConnector, DirectLineConnector>();
-            services.AddScoped<IDeviceRegistrar, DocumentDBDeviceRegistrar>();
+            services.AddScoped<IDeviceRegistrar, MongoDBDeviceRegistrar>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IWechatClient wechatClient)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IOptions<SenparcSetting> senparcSetting, IOptions<SenparcWeixinSetting> senparcWeixinSetting)
         {
+            app.UseSession();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            app.RegisterWeChat(env, senparcSetting, senparcWeixinSetting);
             loggerFactory.AddNLog();
 
             var nlogConfig = "nlog.config";
@@ -91,27 +98,12 @@ namespace WechatConnector
             app.UseMvc();
             app.UseDefaultFiles();
             app.UseStaticFiles();
-
-            //Disable app insight headers for outbound wechat requests
-            var modules = app.ApplicationServices.GetServices<ITelemetryModule>();
-            var dependencyModule = modules.OfType<DependencyTrackingTelemetryModule>().FirstOrDefault();
-            if (dependencyModule != null)
-            {
-                var domains = dependencyModule.ExcludeComponentCorrelationHttpHeadersOnDomains;
-                domains.Add("file.api.wechat.com");
-                domains.Add("file.api.weixin.qq.com");
-            }
-
-            //Setup the menu if we have to
-            await wechatClient.UpdateDefaultMenu();
         }
 
         private void ConfigureOptions(IServiceCollection services)
         {
             services.AddOptions();
-            services.Configure<WechatOptions>(Configuration.GetSection("WechatOptions"));
             services.Configure<DirectLineConnectorOptions>(Configuration.GetSection("DirectLineConnectorOptions"));
-            services.Configure<DocumentDBOptions>(Configuration.GetSection("DocumentDBOptions"));
             services.Configure<DeviceRegistrationOptions>(Configuration.GetSection("DeviceRegistrationOptions"));
         }
     }

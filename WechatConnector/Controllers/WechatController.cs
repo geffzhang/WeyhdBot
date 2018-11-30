@@ -1,146 +1,112 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Threading.Tasks;
+using Senparc.CO2NET.HttpUtility;
+using Senparc.Weixin;
+using Senparc.Weixin.MP;
+using Senparc.Weixin.MP.Entities.Request;
+using Senparc.Weixin.MP.MvcExtension;
+using WechatConnector.CustomMessageHandlers;
 using WeyhdBot.Core.Devices;
 using WeyhdBot.Core.Devices.Model;
-using WeyhdBot.Core.Serialization;
-using WeyhdBot.Core.Connector;
 using WeyhdBot.Core.Wechat;
-using WeyhdBot.WechatClient.Cryptography;
-using WeyhdBot.WechatClient;
-using WeyhdBot.WechatClient.Connector;
-using WeyhdBot.WechatClient.Extensions;
+using WeyhdBot.Wechat.Client;
+using WeyhdBot.Wechat.Connector;
+
+// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WechatConnector.Controllers
 {
-    [Produces("text/plain")]
-    [Route("wechat")]
+    [Route("Wechat")]
     public class WechatController : ControllerBase
     {
         private static readonly string SUCCESS = "success";
-        private static readonly string WECHAT_TOKEN = "wechat_token";
         private static readonly string WECHAT_SUBCHANNEL = "wechat";
         private static readonly string DIRECTLINE_CHANNEL = "directline";
 
+        public static readonly string Token = Config.SenparcWeixinSetting.Token ?? CheckSignature.Token;//与微信公众账号后台的Token设置保持一致，区分大小写。
+        public static readonly string EncodingAESKey = Config.SenparcWeixinSetting.EncodingAESKey;//与微信公众账号后台的EncodingAESKey设置保持一致，区分大小写。
+        public static readonly string AppId = Config.SenparcWeixinSetting.WeixinAppId;//与微信公众账号后台的AppId设置保持一致，区分大小写。
+
+
         private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly ISHA1Encryptor _encryptor;
         private readonly IWechatClient _connector;
         private readonly IDirectLineConnector _directLineConnector;
         private readonly IDeviceRegistrar _deviceRegistrar;
         private readonly ILogger _logger;
 
-        public WechatController(IHostingEnvironment hostingEnvironment, ISHA1Encryptor encryptor, IWechatClient connector, IDirectLineConnector directLineConnector, IDeviceRegistrar deviceRegistrar, ILogger<WechatController> logger)
+        public WechatController(IHostingEnvironment hostingEnvironment, IWechatClient connector, IDirectLineConnector directLineConnector, IDeviceRegistrar deviceRegistrar, ILoggerFactory loggerFactory)
         {
             _hostingEnvironment = hostingEnvironment;
-            _encryptor = encryptor;
             _connector = connector;
             _directLineConnector = directLineConnector;
             _deviceRegistrar = deviceRegistrar;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<WechatController>();
+        }
+
+        [HttpGet]
+        [Route("")]
+        public Task<ActionResult> Get(string signature, string timestamp, string nonce, string echostr)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                if (CheckSignature.Check(signature, timestamp, nonce, Token))
+                {
+                    return echostr; //返回随机字符串则表示验证通过
+                }
+                else
+                {
+                    return "failed:" + signature + "," + Senparc.Weixin.MP.CheckSignature.GetSignature(timestamp, nonce, Token) + "。" +
+                        "如果你在浏览器中看到这句话，说明此地址可以被作为微信公众账号后台的Url，请注意保持Token一致。";
+                }
+            }).ContinueWith<ActionResult>(task => Content(task.Result));
         }
 
         /// <summary>
-        /// WeChat sends a GET request to verify that the bot code is configured correctly
+        /// 最简化的处理流程
         /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public IActionResult Get()
-        {
-            _logger.LogInformation("Got WeChat Verification request");
-
-            string signature = Request.Query["signature"];
-            string timestamp = Request.Query["timestamp"];
-            string nonce = Request.Query["nonce"];
-            string echostr = Request.Query["echostr"];
-
-            if (signature == null || timestamp == null || nonce == null || echostr == null)
-            {
-                _logger.LogWarning("Received bad verification request - expected query params were null");
-                return BadRequest("Missing query params");
-            }
-
-            var verificationElements = new string[] { WECHAT_TOKEN, timestamp, nonce };
-            Array.Sort(verificationElements);
-            var verificationString = string.Join("", verificationElements);
-
-            verificationString = _encryptor.Encrypt(verificationString);
-            if (signature == verificationString)
-            {
-                _logger.LogInformation("WeChat Verified!");
-                return Ok(echostr);
-            }
-            else
-            {
-                _logger.LogWarning("Couldn't Verify: Received [{0}] but expected [{1}]", verificationString, signature);
-                return Ok(string.Empty);
-            }
-        }
-
         [HttpPost]
-        public async Task<IActionResult> Post()
+        [Route("")]
+        public async Task<ActionResult> Post(PostModel postModel)
         {
-            //Immediately returns a "success" OK response back to We Chat.
-            //Although this one is directly calling the DirectLine, we could
-            //route this through an auxiliary connector as well.
-            var xml = await this.ReadRequestContentAsync();
-            _logger.LogInformation("Incoming Wechat Message: {0}", xml);
-
-            Parallel.Invoke(async () =>
+            if (!CheckSignature.Check(postModel.Signature, postModel.Timestamp, postModel.Nonce, Token))
             {
-                try
-                {
-                    var incomingMessage = XmlUtils.Deserialize<WechatMessage>(xml);
+                return new WeixinResult("参数错误！");
+            }
 
-                    if (incomingMessage.isUnsubscribeEvent())
-                    {
-                        //Maybe log some analytics in a real app, archive the dialog history
-                        return;
-                    }
+            postModel.Token = Token;
+            postModel.EncodingAESKey = EncodingAESKey; //根据自己后台的设置保持一致
+            postModel.AppId = AppId; //根据自己后台的设置保持一致
 
-                    var deviceRegistration = await _deviceRegistrar.GetDeviceRegistrationAsync(incomingMessage.FromUserName, DIRECTLINE_CHANNEL, WECHAT_SUBCHANNEL);
-                    if (deviceRegistration == null)
-                    {
-                        //Not registered - create a new one!
-                        var conversation = await _directLineConnector.StartConversationAsync();
-                        deviceRegistration = new DeviceRegistration
-                        {
-                            ChannelId = DIRECTLINE_CHANNEL,
-                            ConversationId = conversation.ConversationId,
-                            UserId = incomingMessage.FromUserName,
-                            Subchannel = WECHAT_SUBCHANNEL
-                        };
-                        await _deviceRegistrar.RegisterDeviceAsync(deviceRegistration);
+            var messageHandler = new CustomMessageHandler(Request.GetRequestMemoryStream(), postModel, 10);
 
-                        await _directLineConnector.JoinConversationAsync(conversation.ConversationId, incomingMessage.FromUserName, WECHAT_SUBCHANNEL);
-                    }
+            messageHandler.DefaultMessageHandlerAsyncEvent = Senparc.NeuChar.MessageHandlers.DefaultMessageHandlerAsyncEvent.SelfSynicMethod;//没有重写的异步方法将默认尝试调用同步方法中的代码（为了偷懒）
 
-                    if (incomingMessage.isSubscribeEvent())
-                    {
-                        //We can respond to new conversations in the BotFramework
-                        //end of the equation as well. However, if we're not cleaning up
-                        //the references we might keep the conversation going inbetween subscriptions
-                        await PostWelcomeMessageAsync(incomingMessage);
-                        return;
-                    }
+            #region 设置消息去重
 
-                    if (incomingMessage.MessageType == WechatMessageTypes.TEXT || incomingMessage.isClickEvent())
-                    {
-                        string message = incomingMessage.MessageType == WechatMessageTypes.TEXT ? incomingMessage.Content : incomingMessage.EventKey;
-                        await _directLineConnector.PostAsync(deviceRegistration.ConversationId, message, userId: incomingMessage.FromUserName, subchannel: WECHAT_SUBCHANNEL);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    //TODO - Post some failure notice to the user
-                    _logger.LogError(ex, "Could not post message to direct line");
-                }
-            });
+            /* 如果需要添加消息去重功能，只需打开OmitRepeatedMessage功能，SDK会自动处理。
+             * 收到重复消息通常是因为微信服务器没有及时收到响应，会持续发送2-5条不等的相同内容的RequestMessage*/
+            messageHandler.OmitRepeatedMessage = true;//默认已经开启，此处仅作为演示，也可以设置为false在本次请求中停用此功能
 
-            return Ok(SUCCESS);
+            #endregion
+
+            //messageHandler.SaveRequestMessageLog();//记录 Request 日志（可选）
+            messageHandler.DeviceRegistrar = _deviceRegistrar;
+            messageHandler.DirectLineConnector = _directLineConnector;
+
+            await messageHandler.ExecuteAsync(); //执行微信处理过程（关键）
+
+            //messageHandler.SaveResponseMessageLog();//记录 Response 日志（可选）
+            
+
+            return new FixWeixinBugWeixinResult(messageHandler);
         }
+
 
         [Route("outgoingmessage")]
         public async Task<IActionResult> PostOutgoingMessage()
@@ -151,23 +117,10 @@ namespace WechatConnector.Controllers
                 _logger.LogWarning("/wechat/outgoingmessage invoked without a message in post body");
                 return BadRequest("No message sent to post!");
             }
-
-            WechatMessage message;
+            var message = JsonConvert.DeserializeObject<WechatMessage>(json);
             try
             {
-                message = JsonConvert.DeserializeObject<WechatMessage>(json);
-            }
-            catch (JsonSerializationException ex)
-            {
-                _logger.LogError(ex, "Bad JSON for outgoing WeChat Message: {0}", json);
-                return BadRequest("JSON not properly formatted for WeChat message");
-            }
-
-            _logger.LogInformation("Outgoing message received | Type: {0}, Contents: \"{1}\", ToUserId: {2}", message.MessageType, message.Content, message.ToUserName);
-
-            try
-            {
-                await _connector.PostMessage(message);
+                await _connector.PostTextMessage(AppId, message.ToUserName, message.Content);
                 return Ok(SUCCESS);
             }
             catch (Exception ex)
@@ -178,12 +131,5 @@ namespace WechatConnector.Controllers
             }
         }
 
-        private async Task PostWelcomeMessageAsync(WechatMessage incomingMessage)
-        {
-            var wechatMessage = incomingMessage.CreateReply();
-            wechatMessage.MessageType = WechatMessageTypes.TEXT;
-            wechatMessage.Content = "Thank you for subscribing! I am the geffzhang ! ";
-            await _connector.PostMessage(wechatMessage);
-        }
     }
 }

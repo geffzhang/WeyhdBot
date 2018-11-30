@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using WeyhdBot.Dispatch;
-using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using WeyhdBot.Core.Connector;
@@ -32,7 +32,7 @@ namespace WeyhdBot.Extensions
             activity.Type = ActivityTypes.Message;
             activity.Text = message;
             return activity;
-         }
-      
+        }
+
     }
 }
