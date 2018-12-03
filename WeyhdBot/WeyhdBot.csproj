@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\WeyhdBot.Core\WeyhdBot.Core.csproj" />
+    <ProjectReference Include="..\Libraries\Bot.Builder.Redis.Storage\Bot.Builder.Redis.Storage.csproj" />
   </ItemGroup>
 
 

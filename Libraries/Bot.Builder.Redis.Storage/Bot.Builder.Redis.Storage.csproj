@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CSRedisCore" Version="3.0.25" />
+    <PackageReference Include="Microsoft.Bot.Builder" Version="4.1.5" />
+  </ItemGroup>
+
+</Project>

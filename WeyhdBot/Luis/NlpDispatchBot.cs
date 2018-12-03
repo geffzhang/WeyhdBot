@@ -47,13 +47,17 @@ namespace WeyhdBot.Luis
 
         private readonly IMessageDispatcher _messageDispatcher;
 
+        private readonly NlpDispatchBotAccessors _accessors;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NlpDispatchBot"/> class.
         /// </summary>
+        /// <param name="accessors">A class containing <see cref="IStatePropertyAccessor{T}"/> used to manage state.</param>
         /// <param name="services">Services configured from the ".bot" file.</param>
         /// <param name="messageDispatcher">messageDispatcher</param>
-        public NlpDispatchBot(BotServices services, IMessageDispatcher messageDispatcher)
+        public NlpDispatchBot(NlpDispatchBotAccessors accessors, BotServices services, IMessageDispatcher messageDispatcher)
         {
+            _accessors = accessors;
             _messageDispatcher = messageDispatcher;
             _services = services ?? throw new System.ArgumentNullException(nameof(services));
 

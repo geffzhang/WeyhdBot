@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Bot.Builder.Redis.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
@@ -90,7 +91,7 @@ namespace WeyhdBot
                 options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
 
                 // Creates a logger for the application to use.
-                ILogger logger = _loggerFactory.CreateLogger<EchoWithCounterBot>();
+                ILogger logger = _loggerFactory.CreateLogger<NlpDispatchBot>();
 
                 // Catches any errors that occur during a conversation turn and logs them.
                 options.OnTurnError = async (context, exception) =>
@@ -101,7 +102,9 @@ namespace WeyhdBot
 
                 // The Memory Storage used here is for local bot debugging only. When the bot
                 // is restarted, everything stored in memory will be gone.
-                IStorage dataStore = new MemoryStorage();
+                var redisStorage = new RedisStorageOptions();
+                Configuration.GetSection("BotStorage:RedisStorage").Bind(redisStorage);
+                IStorage dataStore = new RedisStorage(redisStorage);
 
                 // For production bots use the Azure Blob or
                 // Azure CosmosDB storage providers. For the Azure
@@ -130,7 +133,7 @@ namespace WeyhdBot
 
             // Create and register state accesssors.
             // Acessors created here are passed into the IBot-derived class on every turn.
-            services.AddSingleton<EchoBotAccessors>(sp =>
+            services.AddSingleton<NlpDispatchBotAccessors>(sp =>
             {
                 var options = sp.GetRequiredService<IOptions<BotFrameworkOptions>>().Value;
                 if (options == null)
@@ -153,9 +156,9 @@ namespace WeyhdBot
 
                 // Create the custom state accessor.
                 // State accessors enable other components to read and write individual properties of state.
-                var accessors = new EchoBotAccessors(conversationState, userState)
+                var accessors = new NlpDispatchBotAccessors(conversationState, userState)
                 {
-                    CounterState = conversationState.CreateProperty<CounterState>(EchoBotAccessors.CounterStateName),
+                    CounterState = conversationState.CreateProperty<CounterState>(NlpDispatchBotAccessors.CounterStateName),
                     ConversationDialogState = conversationState.CreateProperty<DialogState>("DialogState"),
                     UserProfile = userState.CreateProperty<UserProfile>("UserProfile"),
                 };

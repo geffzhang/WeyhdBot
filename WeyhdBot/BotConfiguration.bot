@@ -27,7 +27,7 @@
       "kbId": "",
       "subscriptionKey": "",
       "endpointKey": "",
-      "hostname": ""
+      "hostname": "https://xxx.azurewebsites.net/qnamaker"
     },
     {
       "type": "dispatch",
@@ -46,8 +46,8 @@
     {
       "type": "endpoint",
       "appId": "",
-      "appPassword": ""
-      "endpoint": "",
+      "appPassword": "",
+      "endpoint": "https://bot.xxx.com/api/messages",
       "name": "production",
       "id": "165"
     }
