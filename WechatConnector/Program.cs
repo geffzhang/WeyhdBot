@@ -17,12 +17,10 @@ namespace WechatConnector
 #if DEBUG
             PrintSplash();
 #endif
-            CreateWebHostBuild(args)
-                .Build()
-                .Run();
+            CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuild(string[] args) =>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
 
@@ -38,7 +36,7 @@ namespace WechatConnector
                 Console.WriteLine();
                 Console.ResetColor();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }

@@ -1,7 +1,10 @@
-﻿using Microsoft.Bot.Builder;
-using Microsoft.Bot.Connector;
-using Microsoft.Bot.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Schema;
 
 namespace WeyhdBot.Dispatch
 {
@@ -10,6 +13,6 @@ namespace WeyhdBot.Dispatch
     /// </summary>
     public interface IMessageDispatcher
     {
-        Task DispatchAsync(ITurnContext context, IMessageActivity activity);
+        Task DispatchAsync(ITurnContext context, IMessageActivity activity, CancellationToken cancellationToken = default);
     }
 }

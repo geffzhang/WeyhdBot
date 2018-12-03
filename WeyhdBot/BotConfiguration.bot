@@ -1,0 +1,59 @@
+{
+  "name": "WeyhdBot",
+  "description": "",
+  "services": [
+    {
+      "type": "endpoint",
+      "name": "development",
+      "endpoint": "http://localhost:3978/api/messages",
+      "appId": "",
+      "appPassword": "",
+      "id": "1"
+    },
+    {
+      "type": "luis",
+      "name": "myluis",
+      "appId": "",
+      "authoringKey": "",
+      "subscriptionKey": "",
+      "version": "0.1",
+      "region": "eastasia",
+      "id": "7"
+    },
+    {
+      "type": "qna",
+      "name": "sample-qna",
+      "id": "201",
+      "kbId": "",
+      "subscriptionKey": "",
+      "endpointKey": "",
+      "hostname": "https://xxx.azurewebsites.net/qnamaker"
+    },
+    {
+      "type": "dispatch",
+      "serviceIds": [
+        "201",
+        "7"
+      ],
+      "name": "nlp-with-dispatchDispatch",
+      "appId": "",
+      "authoringKey": "",
+      "subscriptionKey": "",
+      "version": "Dispatch",
+      "region": "eastasia",
+      "id": "161"
+    },
+    {
+      "type": "endpoint",
+      "appId": "",
+      "appPassword": "",
+      "endpoint": "https://bot.xxx.com/api/messages",
+      "name": "production",
+      "id": "165"
+    }
+  ],
+  "padlock": "",
+  "version": "2.0",
+  "path": "E:\\Weyhd\\WeyhdBot\\WeyhdBot\\BotConfiguration.bot",
+  "overrides": null
+}
